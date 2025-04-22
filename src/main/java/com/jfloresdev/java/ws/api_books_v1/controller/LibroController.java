@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/libros")
@@ -51,9 +54,79 @@ public class LibroController {
     }
 
 
+    //Save
     @PostMapping
     public LibroEntity create(@RequestBody LibroEntity libro){
         return libroRepository.save(libro);
+    }
+
+    //Para buscar por titulo
+    @GetMapping("/by-titulo")
+    public List<LibroEntity> findByTitulo(@RequestParam String titulo){
+
+        return  this.libroRepository.findByTitulo(titulo);
+    }
+
+    @GetMapping("/by-titulo2")
+    public List<LibroEntity> findByTitulo2(@RequestParam String titulo){
+        return  this.libroRepository.findByTituloContainingIgnoreCase(titulo);
+    }
+
+    //Para actualizar
+    @PutMapping("/{id}")
+    public LibroEntity update(@PathVariable Long id, @RequestBody LibroEntity libroEntity){
+
+     /*   LibroEntity oLibroEntity = libroRepository.findById(id)
+                .orElseThrow(
+                        ()-> new RuntimeException("No existe libro con eel "+id
+                        ));*/
+
+        Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
+
+        if (optLibroEntity.isPresent()){
+
+            LibroEntity oLibroEntity = optLibroEntity.get();
+            oLibroEntity.setId(id);
+            oLibroEntity.setTitulo(libroEntity.getTitulo());
+            oLibroEntity.setResumen(libroEntity.getResumen());
+            oLibroEntity.setNroPaginas(libroEntity.getNroPaginas());
+
+            return this.libroRepository.save(oLibroEntity);
+
+        }
+
+        return this.libroRepository.save(libroEntity);
+    }
+
+    //Actualizacion en parcial
+    @PatchMapping("/{id}")
+    public Object updateResumen(@PathVariable Long id, @RequestBody LibroEntity libroEntity){
+
+      /*  LibroEntity oLibroEntity = libroRepository.findById(id)
+                .orElseThrow(
+                        ()-> new RuntimeException("No existe libro con eel "+id
+                        ));
+*/
+
+        Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
+
+        if (optLibroEntity.isEmpty()){
+            Map<String, String> map = new HashMap<>();
+            map.put("message", "No existe Libro con el id" + id);
+            return map;
+        }
+
+        LibroEntity oLibroEntity = optLibroEntity.get();
+        oLibroEntity.setId(id);
+        oLibroEntity.setResumen(libroEntity.getResumen());
+
+        return this.libroRepository.save(oLibroEntity);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id){
+        libroRepository.deleteById(id);
     }
 
 
