@@ -50,13 +50,15 @@ public class LibroController {
         ));
             return libros;
 */
-        return libroRepository.findAll();
+        //return libroRepository.findAll();
+        return libroRepository.findAllByEstado("1");
     }
 
 
     //Save
     @PostMapping
     public LibroEntity create(@RequestBody LibroEntity libro){
+        //libro.setId("1");
         return libroRepository.save(libro);
     }
 
@@ -123,13 +125,31 @@ public class LibroController {
         return this.libroRepository.save(oLibroEntity);
     }
 
-
+/*
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){
-        libroRepository.deleteById(id);
+        libroRepository.deleteById(id); //Delete Fisico
     }
+*/
 
+    //Delete logico
+        @DeleteMapping("/{id}")
+        public Object delete(@PathVariable Long id){
 
+            Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
+
+            if (optLibroEntity.isEmpty()){
+                Map<String , String> map= new HashMap<>();
+                map.put("messsage", "No existe libro con el id = "+ id);
+                return map;
+            }
+
+            LibroEntity oLibroEntity = optLibroEntity.get();
+            oLibroEntity.setId(id);
+            oLibroEntity.setEstado("0");
+            return this.libroRepository.save(oLibroEntity);
+
+        }
 }
 
 
