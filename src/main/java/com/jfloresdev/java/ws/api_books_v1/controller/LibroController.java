@@ -23,7 +23,11 @@ public class LibroController {
 
     @GetMapping("/{id}")
     public LibroEntity findById(@PathVariable Long id){
-        return this.libroRepository.findById(id).orElse(null);
+     //   return this.libroRepository.findById(id).orElse(null);
+        return  this.libroRepository.findAllByEstado("1").stream()
+                .filter(libroEntity -> libroEntity.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
         /*
         return new LibroEntity(1L,
@@ -136,19 +140,21 @@ public class LibroController {
         @DeleteMapping("/{id}")
         public Object delete(@PathVariable Long id){
 
+            Map<String , String> map= new HashMap<>();
             Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
 
             if (optLibroEntity.isEmpty()){
-                Map<String , String> map= new HashMap<>();
                 map.put("messsage", "No existe libro con el id = "+ id);
                 return map;
             }
-
+            /*
             LibroEntity oLibroEntity = optLibroEntity.get();
             oLibroEntity.setId(id);
-            oLibroEntity.setEstado("0");
-            return this.libroRepository.save(oLibroEntity);
+            oLibroEntity.setEstado("0");*/
 
+            libroRepository.updateEstado(id);
+            map.put("message", "Libro eliminado con exito");
+            return map;
         }
 }
 

@@ -23,4 +23,11 @@ public interface LibroRepository extends JpaRepository<LibroEntity, Long> {
 
     @Query("SELECT L FROM LibroEntity L WHERE L.estado = '1'")
     List<LibroEntity> findAllByEstado(String number);
+
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE libro set estado = '0' where id = :id", nativeQuery = true)
+    void updateEstado(@Param("id") Long id);
+
 }
