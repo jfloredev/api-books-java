@@ -2,7 +2,10 @@ package com.jfloresdev.java.ws.api_books_v1.controller;
 
 import com.jfloresdev.java.ws.api_books_v1.entity.LibroEntity;
 import com.jfloresdev.java.ws.api_books_v1.repository.LibroRepository;
+import com.jfloresdev.java.ws.api_books_v1.service.LibroService;
+import com.jfloresdev.java.ws.api_books_v1.service.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -15,11 +18,56 @@ import java.util.Optional;
 @RequestMapping("/api/v1/libros")
 public class LibroController {
 
+    private Map<String, String> map = new HashMap<>();
+    private String MSG_INTERNAL_ERROR = "Error interno del servidor";
+
 
     //DI
     @Autowired
-    private  LibroRepository libroRepository;
+    private LibroService libroService;
 
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll()  {
+
+
+
+        try {
+            List<LibroEntity> libros = libroService.getAll();
+            if (libros.isEmpty()){
+                return ResponseEntity.ok(libroService.getAll());
+            }else{
+                return ResponseEntity.ok(libros);
+            }
+        }catch (Exception e){
+            map.put("message", MSG_INTERNAL_ERROR);
+           return ResponseEntity.internalServerError().body(map);
+        }
+
+
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findById(@PathVariable Long id){
+
+       try{
+
+           Optional<LibroEntity> optLibroEntity = libroService.findById(id);
+           if (optLibroEntity.isEmpty()) {
+                return ResponseEntity.noContent().build();
+           }else {
+               return ResponseEntity.ok(optLibroEntity);
+           }
+       }catch (Exception e){
+              map.put("message", MSG_INTERNAL_ERROR);
+              return ResponseEntity.internalServerError().body(map);
+         }
+
+    }
+
+
+
+/*
 
     @GetMapping("/{id}")
     public LibroEntity findById(@PathVariable Long id){
@@ -29,44 +77,13 @@ public class LibroController {
                 .findFirst()
                 .orElse(null);
     }
-        /*
-        return new LibroEntity(1L,
-                "El arte de la guerra",
-                "Un libro sobre estrategia militar",
-                300);
-    }*/
 
-    @GetMapping("/all")
-    public List<LibroEntity> getAll(){
-/*
-        List<LibroEntity> libros = new ArrayList<>();
-
-        libros.add(new LibroEntity(1L,
-                "20 poemas y una cancion desesperada",
-                "Un libro de Pablo Neruda",
-                200
-        ));
-
-        libros.add(new LibroEntity(2L,
-                "La ciudad y Los Perros",
-                "Mario Vargas llosa ",
-                200
-        ));
-            return libros;
-*/
-        //return libroRepository.findAll();
-        return libroRepository.findAllByEstado("1");
-    }
-
-
-    //Save
     @PostMapping
     public LibroEntity create(@RequestBody LibroEntity libro){
-        //libro.setId("1");
+
         return libroRepository.save(libro);
     }
 
-    //Para buscar por titulo
     @GetMapping("/by-titulo")
     public List<LibroEntity> findByTitulo(@RequestParam String titulo){
 
@@ -78,14 +95,10 @@ public class LibroController {
         return  this.libroRepository.findByTituloContainingIgnoreCase(titulo);
     }
 
-    //Para actualizar
+
     @PutMapping("/{id}")
     public LibroEntity update(@PathVariable Long id, @RequestBody LibroEntity libroEntity){
 
-     /*   LibroEntity oLibroEntity = libroRepository.findById(id)
-                .orElseThrow(
-                        ()-> new RuntimeException("No existe libro con eel "+id
-                        ));*/
 
         Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
 
@@ -104,15 +117,10 @@ public class LibroController {
         return this.libroRepository.save(libroEntity);
     }
 
-    //Actualizacion en parcial
     @PatchMapping("/{id}")
     public Object updateResumen(@PathVariable Long id, @RequestBody LibroEntity libroEntity){
 
-      /*  LibroEntity oLibroEntity = libroRepository.findById(id)
-                .orElseThrow(
-                        ()-> new RuntimeException("No existe libro con eel "+id
-                        ));
-*/
+
 
         Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
 
@@ -129,14 +137,7 @@ public class LibroController {
         return this.libroRepository.save(oLibroEntity);
     }
 
-/*
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){
-        libroRepository.deleteById(id); //Delete Fisico
-    }
-*/
 
-    //Delete logico
         @DeleteMapping("/{id}")
         public Object delete(@PathVariable Long id){
 
@@ -147,15 +148,13 @@ public class LibroController {
                 map.put("messsage", "No existe libro con el id = "+ id);
                 return map;
             }
-            /*
-            LibroEntity oLibroEntity = optLibroEntity.get();
-            oLibroEntity.setId(id);
-            oLibroEntity.setEstado("0");*/
 
             libroRepository.updateEstado(id);
             map.put("message", "Libro eliminado con exito");
             return map;
         }
+
+        */
 }
 
 
