@@ -5,8 +5,12 @@ import com.jfloresdev.java.ws.api_books_v1.repository.LibroRepository;
 import com.jfloresdev.java.ws.api_books_v1.service.LibroService;
 import com.jfloresdev.java.ws.api_books_v1.service.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
+import static java.util.Objects.isNull;
 
 
 import java.util.HashMap;
@@ -19,12 +23,16 @@ import java.util.Optional;
 public class LibroController {
 
     private Map<String, String> map = new HashMap<>();
-    private String MSG_INTERNAL_ERROR = "Error interno del servidor";
+    private final String MSG_INTERNAL_ERROR = "Error interno del servidor";
+    private final String MSG_BAD_REQUEST =  "Se ha producido un error interno";
 
 
     //DI
-    @Autowired
-    private LibroService libroService;
+    private final LibroService libroService;
+
+    public LibroController(LibroService libroService) {
+        this.libroService = libroService;
+    }
 
 
     @GetMapping("/all")
@@ -66,95 +74,96 @@ public class LibroController {
     }
 
 
+    @GetMapping("/by-titulo")
+    public ResponseEntity<?> findByTitulo(@RequestParam String titulo){
+        try {
+            List<LibroEntity> libros = this.libroService.findByTitulo(titulo);
+            if (libros.isEmpty()){
+                map.put("message", "No se encontraron libros con el titulo: " + titulo);
+                return ResponseEntity.ok(map);
+            }else{
+                return ResponseEntity.ok(libros);
+            }
 
-/*
+    } catch (ServiceException e) {
+            map.put("message", MSG_INTERNAL_ERROR);
+            return ResponseEntity.internalServerError().body(map);
+        }
+}
 
-    @GetMapping("/{id}")
-    public LibroEntity findById(@PathVariable Long id){
-     //   return this.libroRepository.findById(id).orElse(null);
-        return  this.libroRepository.findAllByEstado("1").stream()
-                .filter(libroEntity -> libroEntity.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
 
     @PostMapping
-    public LibroEntity create(@RequestBody LibroEntity libro){
+    public ResponseEntity<?> create(@RequestBody LibroEntity libroEntity) {
 
-        return libroRepository.save(libro);
-    }
+        try{
+            LibroEntity oLibroEntity = this.libroService.save(libroEntity);
+            if (isNull(oLibroEntity)){
+                map.put("alert", MSG_INTERNAL_ERROR);
+                return ResponseEntity.badRequest().body(map);
+            }else {
+                return new ResponseEntity<>(oLibroEntity,HttpStatus.CREATED);
+            }
+        }catch (Exception e){
+            map.put("errpr", MSG_INTERNAL_ERROR);
+            return ResponseEntity.internalServerError().body(map);
+        }
 
-    @GetMapping("/by-titulo")
-    public List<LibroEntity> findByTitulo(@RequestParam String titulo){
 
-        return  this.libroRepository.findByTitulo(titulo);
-    }
-
-    @GetMapping("/by-titulo2")
-    public List<LibroEntity> findByTitulo2(@RequestParam String titulo){
-        return  this.libroRepository.findByTituloContainingIgnoreCase(titulo);
     }
 
 
     @PutMapping("/{id}")
-    public LibroEntity update(@PathVariable Long id, @RequestBody LibroEntity libroEntity){
-
-
-        Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
-
-        if (optLibroEntity.isPresent()){
-
-            LibroEntity oLibroEntity = optLibroEntity.get();
-            oLibroEntity.setId(id);
-            oLibroEntity.setTitulo(libroEntity.getTitulo());
-            oLibroEntity.setResumen(libroEntity.getResumen());
-            oLibroEntity.setNroPaginas(libroEntity.getNroPaginas());
-
-            return this.libroRepository.save(oLibroEntity);
-
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody LibroEntity libroEntity){
+        try {
+            LibroEntity oLibroEntity = this.libroService.update(id, libroEntity);
+            if (isNull(oLibroEntity)){
+                map.put("ALERTA", MSG_BAD_REQUEST);
+                return ResponseEntity.badRequest().body(map);
+            }else {
+                return ResponseEntity.ok(null);
+              //  return new ResponseEntity<>(oLibroEntity, HttpStatus.OK);
+            }
+        }catch (Exception e){
+            map.put("error", MSG_INTERNAL_ERROR);
+            return ResponseEntity.internalServerError().body(map);
         }
-
-        return this.libroRepository.save(libroEntity);
     }
 
     @PatchMapping("/{id}")
-    public Object updateResumen(@PathVariable Long id, @RequestBody LibroEntity libroEntity){
+    public ResponseEntity<?> updateResumen(@PathVariable Long id, @RequestBody LibroEntity libroEntity) {
 
-
-
-        Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
-
-        if (optLibroEntity.isEmpty()){
-            Map<String, String> map = new HashMap<>();
-            map.put("message", "No existe Libro con el id" + id);
-            return map;
+        try {
+            LibroEntity oLibroEntity = this.libroService.updateResumen(id, libroEntity.getResumen());
+            if (isNull(oLibroEntity)) {
+                map.put("alerta", MSG_BAD_REQUEST);
+                return ResponseEntity.badRequest().body(map);
+            } else {
+                return ResponseEntity.ok(oLibroEntity);
+            }
+        } catch (ServiceException e) {
+            map.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(map);
+        } catch (Exception e) {
+            map.put("error", MSG_INTERNAL_ERROR);
+            return ResponseEntity.internalServerError().body(map);
         }
-
-        LibroEntity oLibroEntity = optLibroEntity.get();
-        oLibroEntity.setId(id);
-        oLibroEntity.setResumen(libroEntity.getResumen());
-
-        return this.libroRepository.save(oLibroEntity);
     }
 
 
-        @DeleteMapping("/{id}")
-        public Object delete(@PathVariable Long id){
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id){
 
-            Map<String , String> map= new HashMap<>();
-            Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
-
-            if (optLibroEntity.isEmpty()){
-                map.put("messsage", "No existe libro con el id = "+ id);
-                return map;
-            }
-
-            libroRepository.updateEstado(id);
-            map.put("message", "Libro eliminado con exito");
-            return map;
+       try {
+           this.libroService.delete(id);
+           return ResponseEntity.ok().build();
+         }catch (ServiceException e){
+            map.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(map);
+       }catch (Exception e){
+            map.put("error", MSG_INTERNAL_ERROR);
+            return ResponseEntity.internalServerError().body(map);
         }
-
-        */
+    }
 }
 
 
