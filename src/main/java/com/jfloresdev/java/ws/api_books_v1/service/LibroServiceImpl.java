@@ -23,33 +23,51 @@ public class LibroServiceImpl implements LibroService {
 
     @Override
     public List<LibroEntity> getAll() throws ServiceException {
-        return libroRepository.findAllByEstado("1");
+        try {
+            return this.libroRepository.findAllByEstado("1");
+        } catch (Exception e) {
+            throw new ServiceException("Error al obtener los libros", e);
+        }
     }
 
     @Override
     public List<LibroEntity> findByTitulo(String titulo) throws ServiceException {
-
+    try{
         String val = (titulo == null) ? "" : titulo.trim();
         return this.libroRepository.findByTitulo(val);
 
+    } catch (Exception e) {
+        throw new ServiceException("Error al obtener los libros", e);
+    }
     }
 
     @Override
     public Optional<LibroEntity> findById(Long id) throws ServiceException {
+
+        try{
+
+
         this.libroRepository.findById(id).orElse(null);
         return this.libroRepository.findAllByEstado("1").stream()
                 .filter(libroEntity -> libroEntity.getId().equals(id))
                 .findFirst();
-    }
+    } catch (Exception e) {
+        throw new ServiceException("Error al obtener los libros", e);
+    }}
 
     @Override
     public LibroEntity save(LibroEntity libroEntity) throws ServiceException {
+        try{
         return libroRepository.save(libroEntity);
+    } catch (Exception e) {
+        throw new ServiceException("Error al obtener los libros", e);
+    }
     }
 
     @Override
     public LibroEntity update(Long id, LibroEntity libroEntity) throws ServiceException {
 
+        try{
         Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
 
         if (optLibroEntity.isPresent()){
@@ -65,10 +83,16 @@ public class LibroServiceImpl implements LibroService {
         }
 
         return this.libroRepository.save(libroEntity);
+    } catch (Exception e) {
+        throw new ServiceException("Error al obtener los libros", e);
+    }
     }
 
     @Override
     public LibroEntity updateResumen(Long id, String resumen) throws ServiceException {
+
+        try {
+
 
         Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
 
@@ -78,19 +102,24 @@ public class LibroServiceImpl implements LibroService {
         LibroEntity oLlibroEntity = optLibroEntity.get();
         oLlibroEntity.setResumen(resumen);
         return this.libroRepository.save(oLlibroEntity);
+    } catch (Exception e) {
+        throw new ServiceException("Error al obtener los libros", e);
+    }
     }
 
     @Transactional
     @Override
     public void delete(Long id) throws ServiceException {
 
+    try{
         Optional<LibroEntity> optLibroEntity = libroRepository.findById(id);
 
         if (optLibroEntity.isEmpty()){
             throw  new ServiceException(String.format("No existe libro con el id", id));
         }
         libroRepository.updateEstado(id);
+    } catch (Exception e) {
+        throw new ServiceException("Error al obtener los libros", e);
     }
-
-
+    }
 }
