@@ -32,6 +32,11 @@ public class EditorialEntity {
     @Column(name ="servicios", nullable = false, length = 4000)
     private String servicios;
 
+
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "tipo_id", referencedColumnName = "id", nullable = true)
+    private TipoEntity tipo;
+
     @Column(name = "estado", nullable = false, length = 1)
     private String estado = "1";
 
