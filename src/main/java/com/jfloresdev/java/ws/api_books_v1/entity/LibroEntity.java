@@ -2,8 +2,13 @@ package com.jfloresdev.java.ws.api_books_v1.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-
+@Data
+@Setter
+@Getter
 @Entity //JAVA
 @Table(name = "libro")
 public class LibroEntity {
@@ -31,51 +36,5 @@ public class LibroEntity {
     public LibroEntity(){
     }
 
-    public LibroEntity(Long id, String titulo, String resumen, Integer nroPaginas, String estado) {
-        this.id = id;
-        this.titulo = titulo;
-        this.resumen = resumen;
-        this.nroPaginas = nroPaginas;
-        this.estado = estado;
-    }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public String getResumen() {
-        return resumen;
-    }
-
-    public void setResumen(String resumen) {
-        this.resumen = resumen;
-    }
-
-    public Integer getNroPaginas() {
-        return nroPaginas;
-    }
-
-    public void setNroPaginas(Integer nroPaginas) {
-        this.nroPaginas = nroPaginas;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
 }

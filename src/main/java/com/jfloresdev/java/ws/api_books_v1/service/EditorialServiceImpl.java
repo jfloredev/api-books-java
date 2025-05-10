@@ -18,23 +18,37 @@ public class EditorialServiceImpl implements EditorialService {
     }
 
     @Override
-    public List<EditorialService> getAll() throws ServiceException {
+    public List<EditorialEntity> getAll() throws ServiceException {
         try{
-            return this.editorialRepository.findAllByEstado("1");
+           return editorialRepository.findAllByEstado("1");
         }catch (Exception e){
             throw new ServiceException("Error al obtener los libros", e);
         }
     }
 
     @Override
-    public List<EditorialService> findByNombre(String titulo) throws ServiceException {
+    public List<EditorialEntity> findByNombre(String nombre) throws ServiceException {
 
-        return List.of();
+        try {
+            String val = (nombre == null) ? " " : nombre.trim();
+            return this.editorialRepository.findByNombre(val);
+        } catch (Exception e) {
+            throw new ServiceException("Error al obtener los libros", e);
+        }
     }
 
     @Override
-    public Optional<EditorialService> findById(Long id) throws ServiceException {
-        return Optional.empty();
+    public Optional<EditorialEntity> findById(Long id) throws ServiceException {
+
+        try{
+            this.editorialRepository.findById(id).orElse(null);
+            return this.editorialRepository.findAllByEstado("1").stream()
+                    .filter(editorialEntity -> editorialEntity.getId().equals(id))
+                    .findFirst();
+        }catch (Exception e){
+            throw new ServiceException("ERrro al obtener el libro", e);
+        }
+
     }
 
     @Override
@@ -46,15 +60,34 @@ public class EditorialServiceImpl implements EditorialService {
         }
     }
 
-
     @Override
-    public EditorialService update(Long id, EditorialService editorialService) throws ServiceException {
-        return null;
+    public EditorialEntity update(Long id, EditorialEntity editorialEntity) throws ServiceException {
+
+        try{
+            Optional<EditorialEntity> optEditorialEntity = editorialRepository.findById(id);
+
+            if (optEditorialEntity.isPresent()){
+
+                EditorialEntity oEditorialEntity = optEditorialEntity.get();
+                oEditorialEntity.setId(id);
+                oEditorialEntity.setNombre(editorialEntity.getNombre());
+                oEditorialEntity.setRuc(editorialEntity.getRuc());
+                oEditorialEntity.setServicios(editorialEntity.getServicios());
+
+                return this.editorialRepository.save(oEditorialEntity);
+            }
+
+            return this.editorialRepository.save(editorialEntity);
+
+        }catch (Exception e){
+            throw new ServiceException("error al obtener los editoriales", e);
+        }
+
     }
+
 
     @Override
     public void delete(Long id) throws ServiceException {
-
     }
 
 
