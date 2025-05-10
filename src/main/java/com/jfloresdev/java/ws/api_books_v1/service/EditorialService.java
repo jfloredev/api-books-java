@@ -7,11 +7,11 @@ import java.util.Optional;
 
 public interface EditorialService {
 
-    List<EditorialService> getAll() throws ServiceException;
-    List<EditorialService> findByNombre(String titulo) throws ServiceException;
-    Optional<EditorialService> findById(Long id) throws ServiceException;
+    List<EditorialEntity> getAll() throws ServiceException;
+    List<EditorialEntity> findByNombre(String nombre) throws ServiceException;
+    Optional<EditorialEntity> findById(Long id) throws ServiceException;
     EditorialEntity save(EditorialEntity editorialEntity) throws ServiceException;
-    EditorialService update(Long id, EditorialService editorialService) throws ServiceException;
+    EditorialEntity update(Long id, EditorialEntity editorialEntity) throws ServiceException;
 
     void delete(Long id) throws ServiceException;
 

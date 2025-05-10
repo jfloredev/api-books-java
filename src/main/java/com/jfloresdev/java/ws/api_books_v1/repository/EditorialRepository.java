@@ -15,11 +15,11 @@ public interface EditorialRepository extends JpaRepository<EditorialEntity, Long
     //JPL (Java Persistence Language)
 
     @Query("SELECT p FROM EditorialEntity p WHERE UPPER(p.nombre) LIKE upper(concat('%', :nombre, '%')) and p.estado = '1'")
-    List<EditorialEntity> findByTitulo(@Param("nombre") String titulo);
+    List<EditorialEntity> findByNombre(@Param("nombre") String titulo);
 
 
     @Query("SELECT L FROM EditorialEntity L WHERE L.estado = '1'")
-    List<EditorialService> findAllByEstado(String number);
+    List<EditorialEntity> findAllByEstado(String number);
 
 
     /*
