@@ -17,7 +17,4 @@ public class DemoController {
         return "Demov2";
     }
 
-
-
-
 }
